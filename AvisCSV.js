@@ -60,10 +60,9 @@ function lieferantCsvKonvertieren_(stock, packing) {
         if(hits.length!==1)throw Error(hits.length?'Mehrdeutige Zuordnung':norm(row[c])==='weib'?'Farbe WEIB: möglicher Tippfehler für Weiß; Bestätigung erforderlich':'Keine Zuordnung');
         const hit=hits[0];if(!validEan(hit.ean))throw Error('EAN fehlt oder ist ungültig');
         const existing=result.get(hit.variant);
-        if(existing)existing[3]+=qty;else result.set(hit.variant,[hit.ean,hit.variant,hit.description,qty,'']);
+        if(existing)existing[3]+=qty;else result.set(hit.variant,[hit.ean,hit.variant,hit.description,qty,'','']);
         matchedQuantity+=qty;
       }catch(zuordnungsFehler){
-        errors.push({line,article:row[a],color:row[c],size:row[s],quantity:row[q],reason:zuordnungsFehler.message});
         platzhalterZaehler++;
         const platzhalterEan='9999999'+String(platzhalterZaehler).padStart(6,'0');
         // Genauere Ursache statt nur "keine Zuordnung": vergleicht mit dem,
@@ -71,7 +70,10 @@ function lieferantCsvKonvertieren_(stock, packing) {
         const artikelSchluessel=row[a]?article(row[a]):null;
         const vorhanden=artikelSchluessel?jeArtikel.get(artikelSchluessel):null;
         let ursache;
-        if(!row[a]||!row[c]||!row[s])ursache='Artikel/Farbe/Größe fehlt in Packliste';
+        if(!row[a]||!row[c]||!row[s]){
+          const fehlend=[!row[a]&&'Artikelnummer',!row[c]&&'Farbe',!row[s]&&'Größe'].filter(Boolean).join('/');
+          ursache=fehlend+' fehlt in Packliste';
+        }
         else if(!vorhanden)ursache='Artikel '+row[a]+' existiert nicht im Lager';
         else if(!vorhanden.farben.has(color(row[c]))){
           // Nur als Vorschlag, nie automatisch uebernommen: falls eine Lager-
@@ -85,9 +87,15 @@ function lieferantCsvKonvertieren_(stock, packing) {
         }
         else if(!vorhanden.groessen.has(size(row[s])))ursache='Größe "'+row[s]+'" unbekannt (im Lager: '+[...vorhanden.groessen].join('/')+')';
         else ursache=zuordnungsFehler.message;
+        // Ursache geht NUR ins Fehlerprotokoll (Blatt "CSV-Fehlerdetails"), nicht ins
+        // BATCH-Feld der CSV: das Portal-Feld "Charge" wird beim Versand-Sync 1:1 als
+        // Chargennummer an Lagerdienst uebertragen (lagerdienst.AvisPosition.Batch). Freitext
+        // wuerde dort als angebliche Chargennummer landen.
+        errors.push({line,article:row[a],color:row[c],size:row[s],quantity:row[q],reason:ursache});
         const rohdaten=[row[a],row[c],row[s]].filter(x=>x!=null&&x!=='').join(' ');
-        const beschreibung=(rohdaten?rohdaten+' – ':'')+ursache;
-        result.set('PLATZHALTER-'+platzhalterZaehler,[platzhalterEan,'UNGEKLÄRT-'+platzhalterZaehler,rohdaten||'ungeklärt',qty,beschreibung.slice(0,255)]);
+        // Ursache zusaetzlich als eigene NOTE-Spalte mitgeben, damit sie im Portal in der
+        // separaten Kommentar-Spalte sichtbar ist (nicht in BATCH, siehe Kommentar oben).
+        result.set('PLATZHALTER-'+platzhalterZaehler,[platzhalterEan,'UNGEKLÄRT-'+platzhalterZaehler,rohdaten||'ungeklärt',qty,'',(rohdaten?rohdaten+' – ':'')+ursache]);
       }
     }catch(e){errors.push({line,article:row[a],color:row[c],size:row[s],quantity:row[q],reason:e.message});}
   });
@@ -95,7 +103,7 @@ function lieferantCsvKonvertieren_(stock, packing) {
   const rows=[...result.values()];
   if(new Set(rows.map(r=>r[0])).size!==rows.length)errors.push({reason:'EAN ist mehreren Varianten zugeordnet'});
   const quote=x=>/[",\r\n]/.test(String(x))?'"'+String(x).replace(/"/g,'""')+'"':String(x);
-  const csv=[['EAN','Var-Nr.','','QUANTITY','BATCH'],...rows].map(r=>r.map(quote).join(',')).join('\n')+'\n';
+  const csv=[['EAN','Var-Nr.','','QUANTITY','BATCH','NOTE'],...rows].map(r=>r.map(quote).join(',')).join('\n')+'\n';
   return {ready:errors.length===0,summary:{positions,variants:rows.length,quantity,boxes,matchedQuantity},errors,csv,rows};
 }
 function lieferantCsvIstPackliste_(name) {

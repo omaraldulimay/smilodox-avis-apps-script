@@ -142,7 +142,7 @@ function avisPortalSchreiben_(result,source,supplier){
   if(supplierId==null)return {geschrieben:false,grund:'Lieferantennummer fuer '+supplier+' ist nicht hinterlegt.'};
 
   const quote=x=>/[",\r\n]/.test(String(x))?'"'+String(x).replace(/"/g,'""')+'"':String(x);
-  const csv=[['EAN','Var-Nr.','','QUANTITY','BATCH'],...result.rows].map(r=>r.map(quote).join(',')).join('\n')+'\n';
+  const csv=[['EAN','Var-Nr.','','QUANTITY','BATCH','NOTE'],...result.rows].map(r=>r.map(quote).join(',')).join('\n')+'\n';
   // Die Warnung steht direkt in der Referenz, die in der Portal-Liste sichtbar
   // ist -- ohne dass wir am Portal selbst etwas aendern muessen.
   const warnung=result.ready?'':' ⚠ '+result.errors.length+' von '+result.summary.positions+' Positionen ungeklaert';
@@ -472,11 +472,11 @@ function avisPortalZusammenfuehren_(quellIds,supplierId,supplierName,anlieferdat
     // bleibt wie beim urspruenglichen Import leer (Header ist ebenfalls '').
     bestellung.items.forEach(function(pos){
       const varNr=pos.sku?pos.sku.variation_no:'';
-      alleZeilen.push([pos.ean,varNr,'',pos.quantity,pos.batch||'']);
+      alleZeilen.push([pos.ean,varNr,'',pos.quantity,pos.batch||'',pos.note||'']);
     });
   });
 
-  const csv=[['EAN','Var-Nr.','','QUANTITY','BATCH'],...alleZeilen].map(r=>r.map(quote).join(',')).join('\n')+'\n';
+  const csv=[['EAN','Var-Nr.','','QUANTITY','BATCH','NOTE'],...alleZeilen].map(r=>r.map(quote).join(',')).join('\n')+'\n';
   const referenz='Zusammengefuehrt aus Bestellung '+quellIds.join(' + ');
 
   const ergebnis=avisPortalKomplett_({

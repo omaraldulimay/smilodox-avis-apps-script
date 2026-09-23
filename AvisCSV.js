@@ -6,7 +6,10 @@ function lieferantCsvKonvertieren_(stock, packing) {
   // Nur feste Schreibweisen/Übersetzungen; keine unscharfe Farbähnlichkeit.
   const color = x => {
     const n=norm(x).replace(/\s*\/\s*/g,'/');
-    const aliases={'yellow':'gelb','white':'weiß','grey melange':'grau melange','dunkelgrun':'dunkelgrün','dunkel grün':'dunkelgrün','black':'schwarz','anthrasit':'anthrazit','antrhazit':'anthrazit','anthrasit black':'anthrazit/schwarz','grun black':'grün/schwarz','black anthrasit':'schwarz/anthrazit','black yellow':'schwarz/gelb','marinablau':'marineblau','marinablue':'marineblau','royal blua':'royal blau','acidblack':'acid schwarz','grun':'grün','dunkelblue':'dunkelblau','dunkel blau':'dunkelblau','dunkel rot':'dunkelrot'};
+    // 'ß' als 'b'/'ss' geschrieben ist eine uebliche Ersatzschreibweise, wenn das Zeichen
+    // beim Lieferanten nicht verfuegbar ist (bei mehreren Lieferanten beobachtet) -- kein
+    // mehrdeutiger Tippfehler, deshalb sicher automatisch zuordenbar.
+    const aliases={'yellow':'gelb','white':'weiß','weib':'weiß','weiss':'weiß','grey melange':'grau melange','dunkelgrun':'dunkelgrün','dunkel grün':'dunkelgrün','black':'schwarz','anthrasit':'anthrazit','antrhazit':'anthrazit','anthrasit black':'anthrazit/schwarz','grun black':'grün/schwarz','black anthrasit':'schwarz/anthrazit','black yellow':'schwarz/gelb','schwarz/black':'schwarz','weiß/white':'weiß','marinablau':'marineblau','marinablue':'marineblau','royal blua':'royal blau','acidblack':'acid schwarz','grun':'grün','dunkelblue':'dunkelblau','dunkel blau':'dunkelblau','dunkel rot':'dunkelrot'};
     return aliases[n]||n;
   };
   // Vom Nutzer bestätigt: 2XL und XXL bezeichnen dieselbe Größe.
@@ -57,7 +60,7 @@ function lieferantCsvKonvertieren_(stock, packing) {
         if(!row[a]||!row[c]||!row[s])throw Error('Artikel, Farbe oder Größe fehlt');
         if(norm(row[s])==='mix')throw Error('Größe MIX: Aufteilung nach Einzelgrößen erforderlich');
         const hits=index.get(key(row[a],row[c],row[s]))||[];
-        if(hits.length!==1)throw Error(hits.length?'Mehrdeutige Zuordnung':norm(row[c])==='weib'?'Farbe WEIB: möglicher Tippfehler für Weiß; Bestätigung erforderlich':'Keine Zuordnung');
+        if(hits.length!==1)throw Error(hits.length?'Mehrdeutige Zuordnung':'Keine Zuordnung');
         const hit=hits[0];if(!validEan(hit.ean))throw Error('EAN fehlt oder ist ungültig');
         const existing=result.get(hit.variant);
         if(existing)existing[3]+=qty;else result.set(hit.variant,[hit.ean,hit.variant,hit.description,qty,'','']);

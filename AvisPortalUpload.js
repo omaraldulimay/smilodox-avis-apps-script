@@ -81,7 +81,8 @@ function avisPortalBestellungAnlegen_(token,konfig){
     status:2, // Offen -- bewusst nicht Entwurf (1), damit die Bestellung in der
               // normalen Arbeitsansicht sichtbar ist und nicht uebersehen wird
     supplier_id:konfig.supplierId,
-    supplier_name:konfig.supplierName
+    supplier_name:konfig.supplierName,
+    number_of_cartons:konfig.numberOfCartons||null
   });
 }
 
@@ -151,7 +152,8 @@ function avisPortalSchreiben_(result,source,supplier){
     supplierId:supplierId,
     supplierName:supplier==='Lieferant I'?'Lieferant I; Yenibosna Merkez Mahallesi':supplier,
     anlieferdatum:avisPortalLieferdatum_(source.attachment),
-    referenz:supplier+' '+source.attachment+warnung
+    referenz:supplier+' '+source.attachment+warnung,
+    numberOfCartons:result.summary.boxes||null
   },csv);
   return {geschrieben:true,bestellungId:ergebnis.bestellungId,vollstaendig:result.ready,
           offen:result.ready?0:result.errors.length};

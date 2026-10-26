@@ -284,7 +284,7 @@ function avisFuenfIntern_() {
   const key='avis-five-packlists-v1';
   let queue=JSON.parse(props.getProperty(key)||'null');
   if(!queue){
-    const allowed=['kontakt@lieferant-j.example','kontakt@lieferant-i.example','kontakt@lieferant-i.example'];
+    const allowed=['kontakt@lieferant-j.example','kontakt@lieferant-i.example','kontakt@lieferant-i.example','kontakt@lieferant-i.example'];
     const normal=x=>String(x).normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
     const found=[],seen=new Set();
     const cutoff=Date.now()-90*86400000;
@@ -411,6 +411,7 @@ function pruefeNeuePacklisten(){
     // Wert = Lieferant, dem eingehende Anhaenge dieses Absenders zugeordnet werden.
     const absenderLieferant={
       'kontakt@lieferant-j.example':'Lieferant J',
+      'kontakt@lieferant-i.example':'Lieferant I',
       'kontakt@lieferant-i.example':'Lieferant I',
       'kontakt@lieferant-i.example':'Lieferant I'
     };

@@ -223,7 +223,7 @@ function avisDiagAehnlich_(gesucht,alleArtikel){
 // fehlerfreier Zuordnung ein echtes Avis in die Testdatenbank schreiben.
 function testNaechsteLieferantIPackliste(){
   if(Session.getEffectiveUser().getEmail().toLowerCase()!=='kontakt@firma.example')throw Error('Bitte mit kontakt@firma.example starten.');
-  const allowed=['kontakt@lieferant-i.example','kontakt@lieferant-i.example'];
+  const allowed=['kontakt@lieferant-i.example','kontakt@lieferant-i.example','kontakt@lieferant-i.example'];
   const ausgeschlossen=['1a000956ace6cc13','1a086a79f397c1e5']; // bekannte Ausreisser, wie in avisFuenfIntern_
   const normal=x=>String(x).normalize('NFKD').replace(/[̀-ͯ]/g,'').toLowerCase();
   const found=[],seen=new Set();
@@ -257,7 +257,7 @@ function testNaechsteLieferantIPackliste(){
 // Zweck: zeigen, bei welchen weiteren Lieferanten sich eine Ausweitung lohnt.
 function absenderMitPacklistenFinden(){
   if(Session.getEffectiveUser().getEmail().toLowerCase()!=='kontakt@firma.example')throw Error('Bitte mit kontakt@firma.example starten.');
-  const bekannt=['kontakt@lieferant-j.example','kontakt@lieferant-i.example','kontakt@lieferant-i.example'];
+  const bekannt=['kontakt@lieferant-j.example','kontakt@lieferant-i.example','kontakt@lieferant-i.example','kontakt@lieferant-i.example'];
   const normal=x=>String(x).normalize('NFKD').replace(/[̀-ͯ]/g,'').toLowerCase();
   const proAbsender={}, seen=new Set(), start=Date.now();
   const query='has:attachment filename:xlsx newer_than:180d -in:trash -in:spam';

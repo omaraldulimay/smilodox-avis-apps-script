@@ -50,7 +50,7 @@ function sammleLieferantenTest_() {
   const expected='kontakt@firma.example';
   const account=Session.getEffectiveUser().getEmail().toLowerCase();
   if(account!==expected)throw Error('Bitte mit dem Google-Konto '+expected+' starten. Aktuelles Konto: '+account);
-  const senders=['kontakt@lieferant-j.example','kontakt@lieferant-i.example','kontakt@lieferant-i.example'];
+  const senders=['kontakt@lieferant-j.example','kontakt@lieferant-i.example','kontakt@lieferant-i.example','kontakt@lieferant-i.example'];
   const address=value=>{const m=String(value).match(/<([^>]+)>/);return(m?m[1]:String(value)).trim().toLowerCase();};
   const normalize=value=>String(value).normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
   const query='{'+senders.map(s=>'from:'+s).join(' ')+'} newer_than:90d has:attachment -in:trash -in:spam';

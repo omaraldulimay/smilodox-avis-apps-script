@@ -1,0 +1,9 @@
+# Secrets
+.env
+.env.*
+!.env.example
+.clasprc.json
+
+# OS / Editor
+.DS_Store
+node_modules/
